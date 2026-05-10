@@ -22,7 +22,7 @@ function router(parsedData, socket)
 
         const response =
             "HTTP/1.1 200 OK\r\n" +
-            "Content-Type: text/plain\r\n" +
+            "Content-Type: application/json\r\n" +
             "\r\n" +
             body;
 
