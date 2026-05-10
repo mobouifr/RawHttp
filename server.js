@@ -1,5 +1,7 @@
 // importing the net module required to create a TCP server
 const net = require('net');
+const parser = require('./parser');
+const router = require('./router');
 
 const PORT = 4000;
 
@@ -8,23 +10,16 @@ const server = net.createServer((socket) =>
 {
     console.log("Client connected");
 
-    // triggered whenever the client sends data through the TCP connection
     socket.on("data", (data) => 
     {
         console.log("Data received via TCP client:", data.toString());
 
-        const body = "Hello from my server";
-        const response =
-            "HTTP/1.1 200 OK\r\n" +
-            "Content-Type: text/plain\r\n" +
-            "\r\n" +
-            body;
+        const parsedData = parser(data.toString());
+        console.log("\nParsed data:", parsedData);
 
-        socket.write(response);
-        socket.end();
+        router(parsedData, socket);
     });
 
-    // triggered when the client closes the connection
     socket.on("end", () =>
     {
         console.log("TCP Connection ended");
