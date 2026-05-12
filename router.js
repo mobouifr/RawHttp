@@ -1,4 +1,6 @@
-const fs = require('fs');
+const sendResponse = require('./response');
+const serveFile = require('./serveFile');
+const storage = require('./storage');
 
 function router(parsedData, socket)
 {
@@ -6,105 +8,76 @@ function router(parsedData, socket)
     {
         if (parsedData.path === "/")
         {
-            fs.readFile("./public/index.html", "utf-8", (error, data) => 
-            {
-                if (error)
-                {
-                    socket.write("HTTP/1.1 404 Not Found\r\n" +
-                            "Content-Type: text/plain\r\n" +
-                            "\r\n" +
-                            "404 Not Found");
-                }
-                else
-                {
-                    socket.write( "HTTP/1.1 200 OK\r\n" +
-                            "Content-Type: text/html\r\n" +
-                            "\r\n" + data);
-                }
-                socket.end();
-            });
+            serveFile(
+                socket,
+                "./public/index.html",
+                "text/html"
+            );
         }
 
         else if (parsedData.path === "/style.css")
         {
-            fs.readFile("./public/style.css", "utf-8", (error, data) => 
-            {
-                if (error)
-                {
-                    socket.write("HTTP/1.1 404 Not Found\r\n" +
-                            "Content-Type: text/plain\r\n" +
-                            "\r\n" +
-                            "404 Not Found");
-                }
-                else
-                {
-                    socket.write( "HTTP/1.1 200 OK\r\n" +
-                            "Content-Type: text/css\r\n" +
-                            "\r\n" + data);
-                }
-                socket.end();
-            });
+            serveFile(
+                socket,
+                "./public/style.css",
+                "text/css"
+            );
         }
 
         else if (parsedData.path === "/app.js")
         {
-            fs.readFile("./public/app.js", "utf-8", (error, data) => 
-            {
-                if (error)
-                {
-                    socket.write("HTTP/1.1 404 Not Found\r\n" +
-                            "Content-Type: text/plain\r\n" +
-                            "\r\n" +
-                            "404 Not Found");
-                }
-                else
-                {
-                    socket.write( "HTTP/1.1 200 OK\r\n" +
-                            "Content-Type: application/javascript\r\n" +
-                            "\r\n" + data);
-                }
-                socket.end();
-            });
+            serveFile(
+                socket,
+                "./public/app.js",
+                "application/javascript"
+            );
         }
+
         else
         {
-            const response =
-                "HTTP/1.1 404 Not Found\r\n" +
-                "Content-Type: text/plain\r\n" +
-                "\r\n" +
-                "404 Not Found";
-    
-            socket.write(response);
-            socket.end();
+            sendResponse(
+                socket,
+                "404 Not Found",
+                "text/plain",
+                "404 Not Found"
+            );
         }
     }
 
-    else if (parsedData.method === "POST" && parsedData.path === "/data")
+    else if ( parsedData.method === "POST" && parsedData.path === "/data")
     {
-        const parsedBody = JSON.parse(parsedData.body);
+        try
+        {
+            const parsedBody = JSON.parse(parsedData.body);
 
-        const body = JSON.stringify(parsedBody);
+            const body = JSON.stringify(parsedBody, null, 4);
 
-        const response =
-            "HTTP/1.1 200 OK\r\n" +
-            "Content-Type: application/json\r\n" +
-            "\r\n" +
-            body;
-
-        socket.write(response);
-        socket.end();
+            sendResponse(
+                socket,
+                "200 OK",
+                "application/json",
+                body
+            );
+        }
+        catch
+        {
+            sendResponse(
+                socket,
+                "400 Bad Request",
+                "text/plain",
+                "Invalid JSON"
+            );
+        }
     }
-    
+
     else
     {
-        const response =
-            "HTTP/1.1 404 Not Found\r\n" +
-            "Content-Type: text/plain\r\n" +
-            "\r\n" +
-            "404 Not Found";
-
-        socket.write(response);
-        socket.end();
+        sendResponse(
+            socket,
+            "404 Not Found",
+            "text/plain",
+            "404 Not Found"
+        );
     }
 }
 
