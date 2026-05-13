@@ -4,7 +4,7 @@ const storage = require('./storage');
 
 function router(parsedData, socket)
 {
-    if (parsedData.method === "GET")
+    if ( parsedData.method === "GET" )
     {
         if (parsedData.path === "/")
         {
@@ -33,6 +33,18 @@ function router(parsedData, socket)
             );
         }
 
+        else if (parsedData.path === "/items")
+        {
+            const items = storage.loadData();
+
+            sendResponse(
+                socket,
+                "200 OK",
+                "application/json",
+                JSON.stringify(items, null, 4)
+            );
+        }
+
         else
         {
             sendResponse(
@@ -44,22 +56,28 @@ function router(parsedData, socket)
         }
     }
 
-    else if ( parsedData.method === "POST" && parsedData.path === "/data")
+    else if ( parsedData.method === "POST" && parsedData.path === "/items" )
     {
         try
         {
             const parsedBody = JSON.parse(parsedData.body);
 
-            const body = JSON.stringify(parsedBody, null, 4);
+            const items = storage.loadData();
+
+            const newItem = { id: Date.now(), name: parsedBody.name };
+
+            items.push(newItem);
+
+            storage.saveData(items);
 
             sendResponse(
                 socket,
-                "200 OK",
+                "201 Created",
                 "application/json",
-                body
+                JSON.stringify(newItem, null, 4)
             );
         }
-        catch
+        catch (error)
         {
             sendResponse(
                 socket,
@@ -68,6 +86,28 @@ function router(parsedData, socket)
                 "Invalid JSON"
             );
         }
+    }
+    else if ( parsedData.method === "DELETE" && parsedData.path.startsWith("/items/") )
+    {
+        //Extract ID from URL. Example: /items/123
+
+        const id = Number(parsedData.path.split("/")[2]);
+
+        const items = storage.loadData();
+
+        const filteredItems = items.filter((item) =>
+        {
+            return (item.id !== id);
+        });
+
+        storage.saveData(filteredItems);
+
+        sendResponse(
+            socket,
+            "200 OK",
+            "text/plain",
+            "Item deleted"
+        );
     }
 
     else
