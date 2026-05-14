@@ -10,17 +10,26 @@ const server = net.createServer((socket) =>
 
     socket.on("data", async (data) =>
     {
-        const rawRequest = data.toString();
+        try
+        {
+            const rawRequest = data.toString();
 
-        console.log("\nRAW REQUEST:\n");
-        console.log(rawRequest);
+            console.log("\nRAW REQUEST:\n");
+            console.log(rawRequest);
 
-        const parsedRequest = parser(rawRequest);
+            const parsedRequest = parser(rawRequest);
 
-        console.log("\nPARSED REQUEST:\n");
-        console.log(parsedRequest);
+            console.log("\nPARSED REQUEST:\n");
+            console.log(parsedRequest);
 
-        await router(parsedRequest, socket);
+            await router(parsedRequest, socket);
+        }
+        catch (error)
+        {
+            console.error(error);
+
+            socket.end();
+        }
     });
 
     socket.on("end", () =>

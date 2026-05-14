@@ -35,14 +35,26 @@ async function router(parsedData, socket)
 
         else if (parsedData.path === "/items")
         {
-            const items = await storage.loadData();
+            try
+            {                
+                const items = await storage.loadData();
 
-            sendResponse(
-                socket,
-                "200 OK",
-                "application/json",
-                JSON.stringify(items, null, 4)
-            );
+                sendResponse(
+                    socket,
+                    "200 OK",
+                    "application/json",
+                    JSON.stringify(items, null, 4)
+                );
+            }
+            catch (error)
+            {
+                sendResponse(
+                    socket,
+                    "500 Internal Server Error",
+                    "text/plain",
+                    "Internal Server Error"
+                );
+            }
         }
 
         else
@@ -58,13 +70,35 @@ async function router(parsedData, socket)
 
     else if ( parsedData.method === "POST" && parsedData.path === "/items" )
     {
+        
+        let parsedBody;
+        
         try
         {
-            const parsedBody = JSON.parse(parsedData.body);
+            parsedBody = JSON.parse(parsedData.body);
+        }
+        catch (error)
+        {
+            sendResponse(
+                socket,
+                "400 Bad Request",
+                "text/plain",
+                "Invalid JSON"
+            );
+
+            return ;
+        }
+
+        try
+        {
 
             const items = await storage.loadData();
 
-            const newItem = { id: Date.now(), name: parsedBody.name };
+            const newItem = 
+            { 
+                id: Date.now(),
+                name: parsedBody.name
+            };
 
             items.push(newItem);
 
@@ -81,33 +115,44 @@ async function router(parsedData, socket)
         {
             sendResponse(
                 socket,
-                "400 Bad Request",
+                "500 Internal Server Error",
                 "text/plain",
-                "Invalid JSON"
+                "Internal Server Error"
             );
         }
     }
     else if ( parsedData.method === "DELETE" && parsedData.path.startsWith("/items/") )
     {
         //Extract ID from URL. Example: /items/123
-
-        const id = Number(parsedData.path.split("/")[2]);
-
-        const items = await storage.loadData();
-
-        const filteredItems = items.filter((item) =>
+        try
         {
-            return (item.id !== id);
-        });
+            const id = Number(parsedData.path.split("/")[2]);
 
-        await storage.saveData(filteredItems);
+            const items = await storage.loadData();
 
-        sendResponse(
-            socket,
-            "200 OK",
-            "text/plain",
-            "Item deleted"
-        );
+            const filteredItems = items.filter((item) =>
+            {
+                return (item.id !== id);
+            });
+
+            await storage.saveData(filteredItems);
+
+            sendResponse(
+                socket,
+                "200 OK",
+                "text/plain",
+                "Item deleted"
+            );
+        }
+        catch (error)
+        {
+            sendResponse(
+                socket,
+                "500 Internal Server Error",
+                "text/plain",
+                "Internal Server Error"
+            );            
+        }
     }
 
     else
