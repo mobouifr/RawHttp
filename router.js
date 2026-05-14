@@ -2,7 +2,7 @@ const sendResponse = require('./response');
 const serveFile = require('./serveFile');
 const storage = require('./storage');
 
-function router(parsedData, socket)
+async function router(parsedData, socket)
 {
     if ( parsedData.method === "GET" )
     {
@@ -35,7 +35,7 @@ function router(parsedData, socket)
 
         else if (parsedData.path === "/items")
         {
-            const items = storage.loadData();
+            const items = await storage.loadData();
 
             sendResponse(
                 socket,
@@ -62,13 +62,13 @@ function router(parsedData, socket)
         {
             const parsedBody = JSON.parse(parsedData.body);
 
-            const items = storage.loadData();
+            const items = await storage.loadData();
 
             const newItem = { id: Date.now(), name: parsedBody.name };
 
             items.push(newItem);
 
-            storage.saveData(items);
+            await storage.saveData(items);
 
             sendResponse(
                 socket,
@@ -93,14 +93,14 @@ function router(parsedData, socket)
 
         const id = Number(parsedData.path.split("/")[2]);
 
-        const items = storage.loadData();
+        const items = await storage.loadData();
 
         const filteredItems = items.filter((item) =>
         {
             return (item.id !== id);
         });
 
-        storage.saveData(filteredItems);
+        await storage.saveData(filteredItems);
 
         sendResponse(
             socket,

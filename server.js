@@ -8,7 +8,7 @@ const server = net.createServer((socket) =>
 {
     console.log("Client connected");
 
-    socket.on("data", (data) =>
+    socket.on("data", async (data) =>
     {
         const rawRequest = data.toString();
 
@@ -20,7 +20,7 @@ const server = net.createServer((socket) =>
         console.log("\nPARSED REQUEST:\n");
         console.log(parsedRequest);
 
-        router(parsedRequest, socket);
+        await router(parsedRequest, socket);
     });
 
     socket.on("end", () =>

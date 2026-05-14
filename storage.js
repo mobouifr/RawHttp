@@ -1,10 +1,10 @@
 const fs = require('fs');
 
-function loadData()
+async function loadData()
 {
     try 
     {
-        const data = fs.readFileSync("./data.json", "utf-8");
+        const data = await fs.promises.readFile("./data.json", "utf-8");
         return (JSON.parse(data));
     }
     catch (error)
@@ -14,11 +14,18 @@ function loadData()
     }
 }
 
-function saveData(data)
+async function saveData(data)
 {
     const jsonData = JSON.stringify(data, null, 4);
-    fs.writeFileSync("./data.json", jsonData, "utf-8");
-
+   
+    try
+    {
+        await fs.promises.writeFile("./data.json", jsonData, "utf-8");
+    }
+    catch (error)
+    {
+        console.error("500 Internal Server Error");
+    }
 }
 
 module.exports = {loadData, saveData};
