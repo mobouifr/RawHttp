@@ -1,4 +1,4 @@
-*This project has been created as part of the 42 curriculum by mobouifr.*
+*This project was fully designed and built by mobouifr as a deep dive into how the web actually works underneath modern frameworks.*
 
 <div align="center">
 
@@ -12,7 +12,7 @@
 [![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
 [![HTTP](https://img.shields.io/badge/HTTP-00599C?style=for-the-badge)](https://developer.mozilla.org/en-US/docs/Web/HTTP)
 [![Express](https://img.shields.io/badge/Express-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
-[![42](https://img.shields.io/badge/42-1337-000000?style=for-the-badge)](https://42.fr)
+[![Git](https://img.shields.io/badge/Git-E84D31?style=for-the-badge&logo=git&logoColor=white)](https://git-scm.com/doc)
 
 </div>
 
@@ -20,9 +20,9 @@
 
 ## What is this?
 
-`rawhttp` is a 42 project about rebuilding the web stack from the ground up in Node.js.
+`rawhttp` is a personal learning project focused on rebuilding the web stack from the ground up in Node.js.
 
-The project starts with a raw TCP socket opened manually with Node.js and evolves branch by branch into a complete full-stack application. Instead of starting with frameworks, you rebuild the pieces yourself first: HTTP parsing, routing, persistence, asynchronous execution, APIs, middleware, and frontend communication.
+The project starts with a raw TCP socket opened manually with Node.js and evolves branch by branch into a complete full-stack application. Instead of starting with frameworks, the entire HTTP layer is rebuilt manually first: request parsing, routing, persistence, asynchronous execution, APIs, middleware, and frontend communication.
 
 The goal is not simply to make a web server work — it is to deeply understand what frameworks like Express, NestJS, or React are actually doing underneath.
 
