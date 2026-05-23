@@ -1,44 +1,104 @@
-const net = require('net');
-const parser = require('./parser');
-const router = require('./router');
+const express = require('express');
+const storage = require('./storage');
 
 const PORT = 4000;
 
-const server = net.createServer((socket) =>
+const app = express();
+
+app.use(express.json());
+
+app.use((req, res, next) =>
 {
-    console.log("Client connected");
+    res.setHeader(
+        'Access-Control-Allow-Origin',
+        '*'
+    );
 
-    socket.on("data", async (data) =>
+    next();
+});
+
+app.get('/items', async (req, res) =>
+{
+    try
     {
-        try
-        {
-            const rawRequest = data.toString();
+        const items = await storage.loadData();
 
-            console.log("\nRAW REQUEST:\n");
-            console.log(rawRequest);
-
-            const parsedRequest = parser(rawRequest);
-
-            console.log("\nPARSED REQUEST:\n");
-            console.log(parsedRequest);
-
-            await router(parsedRequest, socket);
-        }
-        catch (error)
-        {
-            console.error(error);
-
-            socket.end();
-        }
-    });
-
-    socket.on("end", () =>
+        res.json(items);
+    }
+    catch (error)
     {
-        console.log("TCP connection ended");
+        console.error(error);
+
+        res.status(500).json({
+            error: 'Internal Server Error'
+        });
+    }
+});
+
+app.post('/items', async (req, res) =>
+{
+    try
+    {
+        const items = await storage.loadData();
+
+        const newItem = {
+            id: Date.now(),
+            name: req.body.name
+        };
+
+        items.push(newItem);
+
+        await storage.saveData(items);
+
+        res.json(newItem);
+    }
+    catch (error)
+    {
+        console.error(error);
+
+        res.status(500).json({
+            error: 'Internal Server Error'
+        });
+    }
+});
+
+app.delete('/items/:id', async (req, res) =>
+{
+    try
+    {
+        const items = await storage.loadData();
+
+        const itemId = Number(req.params.id);
+
+        const filteredItems = items.filter((item) =>
+        {
+            return item.id !== itemId;
+        });
+
+        await storage.saveData(filteredItems);
+
+        res.json({
+            success: true
+        });
+    }
+    catch (error)
+    {
+        console.error(error);
+
+        res.status(500).json({
+            error: 'Internal Server Error'
+        });
+    }
+});
+
+app.use((req, res) =>
+{
+    res.status(404).json({
+        error: 'Route Not Found'
     });
 });
 
-server.listen(PORT, () =>
+app.listen(PORT, () =>
 {
-    console.log(`TCP server listening on port ${PORT}`);
+    console.log('Server listening on port:', PORT);
 });
